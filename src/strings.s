@@ -264,8 +264,10 @@ GetHexStart
 :input                    jsr   RDKEY
 
                           cmp   #$9B                      ;esc = abort
+                          beq   :esc
+                          cmp   #$89                      ; tab / CTRL-I
                           bne   :notesc
-                          rts
+:esc                      rts
 :notesc                   cmp   #$FF                      ;del
                           beq   :goBack
                           cmp   #$88
@@ -375,4 +377,3 @@ _gethex_current           db    0
 _gethex_buffer            ds    _gethex_internalmax
 _gethex_screenx           db    0
 _gethex_byteorder         db    0                         ;0=linear, 1=6502 address byte order.. Least significant byte first.
-
