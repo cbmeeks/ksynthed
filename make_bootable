@@ -1,0 +1,81 @@
+#!/bin/bash
+
+CADIUS=""
+MERLIN="../tools/Merlin32_v1.0/MacOSX/Merlin32"
+
+## YOU SHOULDN'T NEED TO EDIT BELOW HERE
+
+# $1 = sourcefile    $2 = outfile
+function assemble {
+  # CLEAN PREVIOUS BINARY
+  rm $2
+  # RUN ASSEMBLER
+  $MERLIN . $1
+  # VERIFY OUTPUT BINARY WAS GENERATED
+  if [ ! -f $2 ]; then
+    echo FAILED TO BUILD $1  --\>  $2
+    exit 1
+  fi
+}
+
+assemble  "src/ksynth_bload.s" "src/KSYNTHB"
+assemble  "src/ksynth_bas.s" "src/KSYNTHBAS"
+assemble  "src/ksynthed.s" "src/KSYNTHED"
+mv "src/KSYNTHED" "src/KSYNTHED.SYSTEM" # MOVE TO .SYSTEM FILE
+
+# name of your disk image
+DISK="KSYNTH"
+SRCFILES=(`ls src/*.s`)
+SYSFILES=(`ls ../ProDOS_2_4_1/PRODOS src/*system src/*SYSTEM src/KSYNTHB src/KSYNTHBAS src/examples/daisy`)
+CADIUS="../tools/Cadius"
+P8NAME140="${DISK}140"
+IMGNAME140="${DISK}140.po"
+P8NAME800="${DISK}800"
+IMGNAME800="${DISK}800.po"
+DISKSIZE140=140KB
+DISKSIZE800=800KB
+SRCDIR=src
+BLDDIR=build/
+
+if [ ! -d $BLDDIR ] ; then
+  echo "Build directory for this platform doesn't exist so I will create it."
+  mkdir -p $BLDDIR
+  echo "Created: $BLDDIR"
+  sleep 1
+fi
+
+# need to autogen
+cp src/_FileInformation.txt-build $BLDDIR/_FileInformation.txt
+
+$CADIUS createvolume $IMGNAME140 $P8NAME140 $DISKSIZE140
+$CADIUS createvolume $IMGNAME800 $P8NAME800 $DISKSIZE800
+
+# moving source into src dir
+$CADIUS createfolder $IMGNAME140 $P8NAME140/src
+$CADIUS createfolder $IMGNAME800 $P8NAME800/src
+
+#SOURCE FILES
+for f in ${SRCFILES[@]};
+do
+  FNAME=${f##*/}
+  echo Processing $FNAME
+  cp $f $BLDDIR/$FNAME
+  $CADIUS sethighbit $BLDDIR/$FNAME > /dev/null
+  # add -V to debug
+  $CADIUS addfile $IMGNAME140 /$P8NAME140/src/ $BLDDIR/$FNAME >/dev/null
+  $CADIUS addfile $IMGNAME800 /$P8NAME800/src/ $BLDDIR/$FNAME >/dev/null
+
+done
+
+
+#SYSTEM FILES
+for f in ${SYSFILES[@]};
+do
+  FNAME=${f##*/}
+  echo Processing $FNAME
+  cp $f $BLDDIR/$FNAME
+  $CADIUS addfile $IMGNAME140 /$P8NAME140/ $BLDDIR/$FNAME > /dev/null
+  $CADIUS addfile $IMGNAME800 /$P8NAME800/ $BLDDIR/$FNAME > /dev/null
+done
+
+exit
