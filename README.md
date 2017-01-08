@@ -3,7 +3,7 @@ KSYNTHED
 # KSYNTHED
 A synthesizer and music editor program for the Apple II.  Also with player libraries.
 
-![Screenshot of starting the program](doc/web/screenshot.png "Screenshot of starting the program")
+![Screenshot of starting the program](doc/web/Screenshot.png "Screenshot of starting the program")
 
 # Usage
 
