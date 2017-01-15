@@ -4,7 +4,6 @@ A synthesizer and music editor program for the Apple II.  Also with player libra
 ![Screenshot of starting the program](doc/web/Screenshot.png "Screenshot of starting the program")
 
 # Usage
-
 This is intended for use on an Apple II or emulator.  The images provided are built with ProDOS 2.4.1 installed and should be bootable on any emulator, or you can transfer them to a 3.5" or 5.25" disk using ADT Pro or to a Flash Storage device like the CFFA 3000.
 
 If you just want the program, the latest disk images are
@@ -20,11 +19,11 @@ The songs themselves are stored in a simple format where a note consists of two 
 However, I've also added a nice little library that you can use to make it easier to call from AppleSoft BASIC.  You load the BASIC version and then use CALL to play songs (or notes).
 
 ```BASIC
-10 PRINT CHR$(4)"BLOAD KSYNTHBAS,A$300"  : REM A$ SHOULD
-20 PRINT CHR$(4)"BLOAD MYSONG,A$4000"  : LOAD WHEREVER NEEDED
-30 CALL 768,1,16384   : REM SETSONG 16384 = $4000
-REM NOW YOU CAN PLAY THE SONG BY CALLING PLAYSONG LIKE THIS
-40 CALL 768,2         : REM PLAYSONG
+10 PRINT CHR$(4)"BLOAD KSYNTHBAS,A$300"  : REM A$ SHOULDN'T BE NEEDED
+20 PRINT CHR$(4)"BLOAD MYSONG,A$4000"    : REM LOAD WHEREVER NEEDED
+30 CALL 768,1,16384                      : REM SETSONG 16384 = $4000
+REM NOW YOU CAN PLAY THE SONG BY CALLING PLAYSONG LIKE THIS...
+40 CALL 768,2                            : REM PLAYSONG
 ```
 
 # Build
