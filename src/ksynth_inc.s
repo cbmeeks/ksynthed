@@ -125,6 +125,12 @@ ks_player
 :song_done                RTS                             ;
 
 
+ks_playhere_latched                                       ; This just modifies the start position for below.
+                          sta   :latch_callback-1         ; I'm starting to get lazy just to be done
+                          jsr   ks_player_latched
+                          lda   #0
+                          sta   :latch_callback-1
+                          rts
 
 ks_player_latched
 :patch_player             LDA   ks_song_space
@@ -206,16 +212,17 @@ ks_player_note
 
 ks_player_note_init
 :patch_player             LDA   ks_song_space
-                        STA   ]song_space+1
-                        STA   ]song_space2+1
-                        STA   ks_get_songvalue+1
-                        LDY   ks_song_space+1
-                        STY   ]song_space+2
-                        STY   ]song_space2+2
-                        STY   ks_get_songvalue+2
+                          STA   ]song_space+1
+                          STA   ]song_space2+1
+                          STA   ks_get_songvalue+1
+                          LDY   ks_song_space+1
+                          STY   ]song_space+2
+                          STY   ]song_space2+2
+                          STY   ks_get_songvalue+2
 
 
-                        LDA   #$00                      ;	start at zero
-                        sta   _ks_player_note_position
-                        rts                         ;
+                          LDA   #$00                      ;	start at zero
+                          sta   _ks_player_note_position
+                          rts                             ;
 _ks_player_note_position  db    0                         ; keeps track upon re-entry
+

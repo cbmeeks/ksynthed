@@ -35,10 +35,10 @@ entry                     jsr   COMBYTE                   ; get first CALL param
 ** Music Player **
 ks_play_note              lda   _ks_player_note_position
                           asl
-                          clv   ; clear V flag
+                          clv                             ; clear V flag
                           bvc   :note_loop
-ks_play_song              lda #0  ; start at 0
-                          bit _bit_overflower ; set V flag
+ks_play_song              lda   #0                        ; start at 0
+                          bit   _bit_overflower           ; set V flag
 :note_loop                TAX                             ;	X = 0; LOOP
 ]song_space               LDA   $1000,X                   ;	load note duration
                           BEQ   :song_done                ;	if note is 0 duration, end the song
@@ -54,9 +54,9 @@ ks_play_song              lda #0  ; start at 0
 :not_rest                 DEC   $FD                       ;	decrement $FD for That Karateka Sound™
                           TXA                             ;	put current note address in Accumulator
                           STA   $FF                       ;	store that in $FF
-                          PHP ; save because tonegen uses bit and destroys V
+                          PHP                             ; save because tonegen uses bit and destroys V
                           JSR   ks_tonegen                ;	play the actual note
-                          PLP ; and restore.  could be better
+                          PLP                             ; and restore.  could be better
                           LDA   :click+2                  ;	did we mess with the C030 click?
                           CMP   #$FF                      ;	if it's FF, we did. change it back.
                           BNE   :next_note                ;	skip if !=FF
@@ -81,7 +81,7 @@ ks_set_song               JSR   CHKCOM
                           JSR   FRMNUM
                           JSR   GETADR
                           LDA   LINNUM
-                          STA   ]song_space+1               ; self-modifying patches
+                          STA   ]song_space+1             ; self-modifying patches
                           STA   ]song_space2+1
                           LDA   LINNUM+1
                           STA   ]song_space+2
@@ -125,6 +125,7 @@ ks_tonegen
 
 
 _ks_player_note_position  DB    0                         ; keeps track upon re-entry
-_bit_overflower db $40  ; bit 6 (v) is 1
+_bit_overflower           db    $40                       ; bit 6 (v) is 1
                           put   APPLEROM
                           sav   KSYNTHBAS
+

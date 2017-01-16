@@ -8,7 +8,7 @@
 *  X- return to Edit note  \
 *  X- insert note           > note entry  - String Inputter - dialog / window?
 *  X- delete note          /
-*  - virtual keyboard ?
+*  X- virtual keyboard ?
 *  - up/down note nudging ?  what about duration?
 *  X- load
 *  X- save
@@ -113,8 +113,9 @@ MAIN_NO_DRAW                                                                    
                        jmp          :MAIN_KEY_LOOP
 
 MAIN_KEY_HIT           db           0                                                     ; store last key hit in buffer
-MAIN_KEY_TABLE         asc          90," ",8D                                             ; 90 = CTRL-P
-                       asc          8C,93,8E,91                                              ; 8C=^L  93=^S  8E=^N  91=^Q
+MAIN_KEY_TABLE         asc          90,"P","p"                                            ; 90 = CTRL-P
+                       asc          " ",8D                                                ; 8D = Enter
+                       asc          8C,93,8E,91                                           ; 8C=^L  93=^S  8E=^N  91=^Q
                        asc          83,96                                                 ; 83=^C  96=^V
                        asc          89,84,F2,F5                                           ; 89=^I  84=^D  F2=Ins  F5=Del
                        asc          #KEY_LTARROW,#KEY_RTARROW
@@ -123,7 +124,8 @@ MAIN_KEY_TABLE         asc          90," ",8D                                   
                        asc          "?","h","H"
                        asc          B1,B2,B3,B4,B5,B6,B7,B8,B9                            ; number keys
                        asc          "b",00
-MAIN_KEY_JUMP_TABLE    da           MAINKEY_PLAYSONG-1,MAINKEY_PLAYNOTE-1,MAINKEY_ENTERNOTE-1
+MAIN_KEY_JUMP_TABLE    da           MAINKEY_PLAYSONG-1,MAINKEY_PLAYHERE-1,MAINKEY_PLAYHERE-1
+                       da           MAINKEY_PLAYNOTE-1,MAINKEY_ENTERNOTE-1
                        da           MAINKEY_LOAD-1,MAINKEY_SAVE-1,MAINKEY_NEW-1,MAINKEY_QUIT-1
                        da           MAINKEY_COPY-1,MAINKEY_PASTE-1
                        da           MAINKEY_INSERT-1,MAINKEY_DELETE-1,MAINKEY_INSERT-1,MAINKEY_DELETE-1
@@ -243,10 +245,18 @@ vk_note_value          db           0
 vk_note_duration       db           0
 
 
-MAINKEY_QUIT  jmp Quit  ; WE OUT!
+MAINKEY_QUIT           jmp          Quit                                                  ; WE OUT!
 
 
 MAINKEY_PLAYSONG       jsr          ks_player_latched                                     ; included from ksynth_inc.s
+                       jmp          MAIN_NO_DRAW
+
+MAINKEY_PLAYHERE       lda          ks_current_note_idx                                   ; we pass in our desired start note
+                       asl
+                       jsr          ks_playhere_latched                                   ; included from ksynth_inc.s
+                       lda          $FF
+                       lsr                                                                ; /2
+                       sta          ks_current_note_idx                                   ;
                        jmp          MAIN_NO_DRAW
 
 
@@ -580,8 +590,14 @@ _enternote_tmpaddr     da           $1000
 
 
 MAINKEY_HELP           jsr          HOME
-                       lda          #_strs_help_screen
-                       ldy          #>_strs_help_screen
+                       lda          #_strs_help_screen1
+                       ldy          #>_strs_help_screen1
+                       ldx          #00                                                   ; horiz pos
+                       jsr          PrintStringsX
+                       jsr          WaitKey
+                       jsr          HOME
+                       lda          #_strs_help_screen2
+                       ldy          #>_strs_help_screen2
                        ldx          #00                                                   ; horiz pos
                        jsr          PrintStringsX
                        jsr          WaitKey
@@ -1148,7 +1164,7 @@ _strs_dialog_box       asc          " ___________________________________",8D,00
                        asc          "|___________________________________|`",00,00
 
 
-_strs_help_screen      asc          " _____________  KSYNTHED  _____________",8D,00
+_strs_help_screen1     asc          " _____________  KSYNTHED  ______ 1/2 __",8D,00
                        asc          "|                                      |",00
                        asc          "| SONG CONTROL KEYS                    |",00
                        asc          "|                                      |",00
@@ -1171,6 +1187,33 @@ _strs_help_screen      asc          " _____________  KSYNTHED  _____________",8D
                        asc          "|  H or ?     =  HELP SCREEN           |",00
                        asc          "|  CTRL-Q     =  QUIT                  |",00
                        asc          "|______________________________________|",00,00
+
+_strs_help_screen2     asc          " _____________  KSYNTHED  ______ 2/2 __",8D,00
+                       asc          "|                                      |",00
+                       asc          "| IN VIRTUAL KEYBOARD MODE, THE BOTTOM |",00
+                       asc          "| ROWS OF KEYS WORK LIKE A KEYBOARD.   |",00
+                       asc          "|                                      |",00
+                       asc          "|         S   D     G   H   J          |",00
+                       asc          "|       Z   X   C V   B   N   M        |",00
+                       asc          "|                                      |",00
+                       asc          "|  CHANGE THE OCTAVE WITH '[' & ']'    |",00
+                       asc          "|  CHANGE THE DEFAULT NOTE LENGTH      |",00
+                       asc          "|  BY HITTING CTRL-K                   |",00
+                       asc          "|                                      |",00
+                       asc          "|  TO 'COMMIT' A NOTE IN THE CURRENT   |",00
+                       asc          "|  POSITION, HIT 'RETURN'              |",00
+                       asc          "|                                      |",00
+                       asc          "|                                      |",00
+                       asc          "|                                      |",00
+                       asc          "|                                      |",00
+                       asc          "|   KSYNTHED (C) 2017 - DAGEN BROCK    |",00
+                       asc          "|                                      |",00
+                       asc          "|                                      |",00
+                       asc          "| PRESS ANY KEY TO GO BACK TO EDITOR.  |",00
+                       asc          "|______________________________________|",00,00
+
+
+
 
 
 ** This is the hash to match to "known" note values in the ks_note_str3_tbl
