@@ -8,7 +8,9 @@ MERLIN="../tools/Merlin32_v1.0/MacOSX/Merlin32"
 # $1 = sourcefile    $2 = outfile
 function assemble {
   # CLEAN PREVIOUS BINARY
-  rm $2
+  if [ -f $2 ]; then
+    rm $2
+  fi
   # RUN ASSEMBLER
   $MERLIN . $1
   # VERIFY OUTPUT BINARY WAS GENERATED
@@ -24,9 +26,9 @@ assemble  "src/ksynthed.s" "src/KSYNTHED"
 mv "src/KSYNTHED" "src/KSYNTHED.SYSTEM" # MOVE TO .SYSTEM FILE
 
 # name of your disk image
-DISK="KSYNTH"
+DISK="KSYNTHED"
 SRCFILES=(`ls src/*.s`)
-SYSFILES=(`ls ../ProDOS_2_4_1/PRODOS src/*system src/*SYSTEM src/KSYNTHB src/KSYNTHBAS src/examples/daisy`)
+SYSFILES=(`ls ../ProDOS_2_4_1/PRODOS src/*system src/*SYSTEM src/KSYNTHB src/KSYNTHBAS src/examples/daisy src/examples/escale src/examples/song1`)
 CADIUS="../tools/Cadius"
 P8NAME140="${DISK}140"
 IMGNAME140="${DISK}140.po"
